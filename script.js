@@ -42,7 +42,10 @@ let questions = [
   },
 ];
 
+let rightQuestions = 0;
 let currentQuestion = 0;
+let AUDIO_SUCCESS = new Audio('audio/right-answer.mp3');
+let AUDIO_FAIL = new Audio('audio/wrong-answer.mp3');
 
 function init() {
   document.getElementById('all-questions').innerHTML =
@@ -51,25 +54,42 @@ function init() {
 }
 
 function showQuestion() {
-  if (currentQuestion >= questions.length) {
-    document.getElementById('end-screen').style = '';
-    document.getElementById('question-body').style = 'display: none';
+  if (gameIsOver()) {
+    showEndScreen();
   } else {
-    let question = questions[currentQuestion];
-
-    document.getElementById('current-question-number').innerHTML =
-      currentQuestion + 1;
-    document.getElementById('questiontext').innerHTML =
-      question['question'];
-    document.getElementById('answer_1').innerHTML =
-      question['answer_1'];
-    document.getElementById('answer_2').innerHTML =
-      question['answer_2'];
-    document.getElementById('answer_3').innerHTML =
-      question['answer_3'];
-    document.getElementById('answer_4').innerHTML =
-      question['answer_4'];
+    updateProgressBar();
+    updateToNextQuestion();
   }
+}
+
+function gameIsOver() {
+  return currentQuestion >= questions.length;
+}
+
+function updateProgressBar() {
+  let percent = (currentQuestion + 1) / questions.length;
+  percent = percent * 100;
+  document.getElementById('progress-bar').innerHTML = `${percent}%`;
+  document.getElementById('progress-bar').style.width = `${percent}%`;
+}
+
+function updateToNextQuestion() {
+  updateProgressBar();
+
+  let question = questions[currentQuestion];
+
+  document.getElementById('current-question-number').innerHTML =
+    currentQuestion + 1;
+  document.getElementById('questiontext').innerHTML =
+    question['question'];
+  document.getElementById('answer_1').innerHTML =
+    question['answer_1'];
+  document.getElementById('answer_2').innerHTML =
+    question['answer_2'];
+  document.getElementById('answer_3').innerHTML =
+    question['answer_3'];
+  document.getElementById('answer_4').innerHTML =
+    question['answer_4'];
 }
 
 function answer(selection) {
@@ -81,6 +101,8 @@ function answer(selection) {
     document
       .getElementById(selection)
       .parentNode.classList.add('bg-success');
+    AUDIO_SUCCESS.play();
+    rightQuestions++;
   } else {
     document.getElementById('current-question-number').innerHTML =
       currentQuestion + 1;
@@ -90,6 +112,7 @@ function answer(selection) {
     document
       .getElementById(idOfRightAnswer)
       .parentNode.classList.add('bg-success');
+    AUDIO_FAIL.play();
   }
   document.getElementById('next-button').disabled = false;
 }
@@ -126,4 +149,23 @@ function resetAnswerButtons() {
   document
     .getElementById('answer_4')
     .parentNode.classList.remove('bg-success');
+}
+
+function restartGame() {
+  document.getElementById('box-img').src = 'img/pencil.jpg';
+  document.getElementById('question-body').style = '';
+  document.getElementById('end-screen').style = 'display: none';
+  rightQuestions = 0;
+  currentQuestion = 0;
+  init();
+}
+
+function showEndScreen() {
+  document.getElementById('end-screen').style = '';
+  document.getElementById('question-body').style = 'display: none';
+  document.getElementById('amount-of-questions').innerHTML =
+    questions.length;
+  document.getElementById('amount-of-right-questions').innerHTML =
+    rightQuestions;
+  document.getElementById('box-img').src = 'img/trophy.png';
 }
